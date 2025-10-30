@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+
+  app:
+    image: "${APP_IMAGE:-app:v2}"
+    # When image is local built, compose will use it
+    ports:
+      - "3000:3000"
+    networks:
+      - demo-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - demo-net
+    depends_on:
+      - app
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093"
+    networks:
+      - demo-net
+    depends_on:
+      - prometheus
+
+networks:
+  demo-net:
+    driver: bridge

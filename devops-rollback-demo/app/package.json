@@ -1,0 +1,9 @@
+{
+  "name": "rollback-demo-app",
+  "version": "1.0.0",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "prom-client": "^14.0.1"
+  }
+}

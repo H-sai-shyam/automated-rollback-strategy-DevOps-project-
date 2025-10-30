@@ -1,0 +1,8 @@
+global: {}
+route:
+  receiver: 'rollback-webhook'
+receivers:
+- name: 'rollback-webhook'
+  webhook_configs:
+  - url: 'http://rollback:5001/webhook'
+    send_resolved: false

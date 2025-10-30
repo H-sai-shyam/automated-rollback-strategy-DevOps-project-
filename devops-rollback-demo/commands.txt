@@ -1,0 +1,40 @@
+# -----------------------------
+# STEP 1: Build the app images
+# -----------------------------
+Set-Content app/version.txt 'v1'
+docker build -t app:v1 ./app
+
+Set-Content app/version.txt 'v2'
+docker build -t app:v2 ./app
+
+
+# --------------------------------
+# STEP 2: Start the Docker stack
+# --------------------------------
+$env:APP_IMAGE="app:v2"
+docker-compose up -d
+
+
+# --------------------------------------
+# STEP 3: Run rollback service locally
+# --------------------------------------
+cd rollback_service
+python -m venv venv
+venv\Scripts\activate
+pip install flask
+python rollback_service.py
+# (This runs on 0.0.0.0:5001)
+
+
+# -------------------------------------------------
+# STEP 4: Trigger simulated errors for rollback
+# -------------------------------------------------
+for ($i=1; $i -le 5; $i++) {
+   & curl.exe -s -o NUL -w "%{http_code}`n" "http://localhost:3000/simulate_error"       
+   Start-Sleep -Seconds 1  
+}
+
+# -------------------------------------------------
+# STEP 5: Verify rollback outcome
+# -------------------------------------------------
+Invoke-RestMethod -Uri "http://localhost:3000/"
